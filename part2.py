@@ -3,6 +3,7 @@ import xlwt
 import xlrd
 import csv
 import numpy as np
+from collections import OrderedDict
 
 CONST_SOURCE = 'İZMİR'
 CITY_COUNT = 81
@@ -14,7 +15,9 @@ def calcDist(distMat, cityList, source, destination):
 	
 	print source + ' is source city and destination is set to ' + destination
 	
-	distanceDict = {}
+	distanceDict = OrderedDict()
+	parentDict = OrderedDict()
+	path = []
 	
 	distanceDict.update({source: 0})
 	
@@ -35,10 +38,28 @@ def calcDist(distMat, cityList, source, destination):
 			
 					if distanceDict[city] == float('inf'):
 						distanceDict[city] = dist+ val
+						parentDict[city] = key
 					else:
+						temp = distanceDict[city]
 						distanceDict[city] = min(distanceDict[city], (val + dist))
-						
-	print 'Shortest distance is: ' + str(distanceDict[destination])
+						if temp != distanceDict[city]:
+							parentDict[city] = key
+							
+	temp = parentDict[destination]
+	while temp != source:
+		path.append(temp)
+		temp = parentDict[temp]
+	path.append(source)
+	
+	print '\nShortest distance is: ' + str(distanceDict[destination]) + 'km'
+	print '\nPath is as follows:'
+	
+	for city in reversed(path):
+		print city + '->',
+	print destination	 
+	
+
+	
 	
 	
 						
@@ -85,14 +106,15 @@ def main():
 	print 'Please use uppercase Turkısh letters'
 	select = raw_input('Input destination:')
 	cityDecoded = select.decode("utf-8")
-
+	source = CONST_SOURCE.decode("utf-8")
 	#Checking if destination city is valid
 	if ( cityDecoded not in cityList):
 		print 'Destination is not valid'
 
-	else:
+	elif cityDecoded != source:
 		calcDist(distMat, cityList, CONST_SOURCE, cityDecoded)
-
+	else:
+		print 'Destination choosen as source city'
 
 
 if __name__ == "__main__":
